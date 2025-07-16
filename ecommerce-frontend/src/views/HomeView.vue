@@ -48,7 +48,7 @@
   import CategoryBox from "../components/Category/CategoryBox";
   export default {
     name: 'HomeView',
-    components : { ProductBox, CategoryBox},
+    components : {ProductBox, CategoryBox},
     props : ["baseURL", "products", "categories"],
     data(){
       return{
@@ -58,11 +58,11 @@
     },
     mounted(){
       this.category_size = this.categories.length;
-      this.category_size = Math.min(6, this.category_size);
+      this.category_size = Math.min(3, this.category_size);
 
       this.product_size = this.products.length;
-      this.product_size = Math.min(8, this.category_size);
-    }
+      this.product_size = Math.min(8, this.product_size);
+    },
   }
 </script>
 

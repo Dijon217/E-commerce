@@ -32,6 +32,10 @@
             <label>Price</label>
             <input type="number" class="form-control" v-model="price" required>
           </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" class="form-control" v-model="quantity" required>
+          </div>
           <button type="button" class="btn btn-primary" @click="editProduct">Update</button>
           <button type="button" class="btn btn-danger" @click="deleteProduct">Delete</button>
         </form>
@@ -54,7 +58,8 @@ export default {
       description : null,
       imageURL : null,
       price : 0,
-      productIndex : null
+      productIndex : null,
+      quantity: 0
     }
   },
   props : ["baseURL", "products", "categories"],
@@ -66,7 +71,8 @@ export default {
         name : this.name,
         description : this.description,
         imageURL : this.imageURL,
-        price : this.price
+        price : this.price,
+        quantity : this.quantity
       }
 
       await axios({
@@ -123,6 +129,7 @@ export default {
     this.description = this.products[this.productIndex].description;
     this.imageURL = this.products[this.productIndex].imageUrl;
     this.price = this.products[this.productIndex].price;
+    this.quantity = this.products[this.productIndex].quantity
   }
 }
 </script>

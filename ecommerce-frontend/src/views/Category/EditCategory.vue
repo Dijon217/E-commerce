@@ -76,18 +76,61 @@ export default {
     },
     
     async deleteCategory() {
-      await axios.post(this.baseURL + "category/delete/" + this.id)
-      .then(() => {
-        this.$router.replace("/admin/category");
+    try {
+      const response = await axios.post(this.baseURL + "category/delete/" + this.id);
+      this.$router.replace("/admin/category");
+      if (response.status === 200 && response.data.success) {
         swal({
-          text: "Category Deleted Successfully!",
+          text: response.data.message,
           icon: "success",
           closeOnClickOutside: false,
         });
-      })
-      .catch(err => console.log(err));
+      } 
+
+      } catch (err) {
+      if (err.response) {
+        // Server responded with a status code outside 2xx
+        const status = err.response.status;
+        const message = err.response?.data?.message;
+
+        if (status === 400) {
+          swal({
+            text: message || "Bad Request: Please check the category ID or dependencies.",
+            icon: "info",
+            closeOnClickOutside: false,
+          });
+        } else if (status === 404) {
+          swal({
+            text: "Category not found.",
+            icon: "error",
+            closeOnClickOutside: false,
+          });
+        } else {
+          swal({
+            text: `Unexpected error: ${status}`,
+            icon: "error",
+            closeOnClickOutside: false,
+          });
+        }
+        } else if (err.request) {
+        // Request was made but no response received
+        swal({
+          text: "No response from server. Please try again later.",
+          icon: "error",
+          closeOnClickOutside: false,
+        });
+        } else {
+        // Something else caused the error
+        swal({
+          text: "An error occurred: " + err.message,
+          icon: "error",
+          closeOnClickOutside: false,
+        });
+      }
+      console.error("Delete category error:", err);
     }
-  },
+  }
+},
   mounted() {
     this.id = this.$route.params.id;
     this.category = this.categories.filter(category => category.id == this.id)[0];

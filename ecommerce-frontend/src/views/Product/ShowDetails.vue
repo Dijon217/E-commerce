@@ -6,7 +6,7 @@
           </div>
           <!--                Display the image in left side-->
           <div class="col-md-4 col-12">
-              <img :src="product.imageUrl" :alt="product.name" class="img-fluid" width="200">
+              <img :src="product.imageUrl" :alt="product.name" class="img-fluid" width="500">
           </div>
           <!-- Display product name category name and product description-->
           <div class="col-md-6 col-12 pt-3 pt-md-0">
@@ -90,9 +90,11 @@ import swal from 'sweetalert';
         // add to cart function
         addToCart(productId){
         // post productId and quantity
-            axios.post(`${this.baseURL}cart/add?token=${this.token}`,{
+            const token = localStorage.getItem('token');
+            axios.post(`${this.baseURL}cart/add?token=${token}`,
+            {
                 productId : productId,
-                quantity : this.quantity
+                quantity : this.quantity,
             }).then((response) => {
                 // success
                 if(response.status==201){

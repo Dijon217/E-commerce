@@ -16,21 +16,21 @@
               v-for="user in users"
               :key="user.id"
               :user="user"
-            />
+            />a
           </tbody>
         </table>
       </div>
     </div>
 </template>
-  
+   
 <script>
 import UserRow from '../../components/User/UserRow'
 var axios =  require('axios');  
 export default {
-    name: 'uList',
-    components: { UserRow },
-    data() {
-      return {
+  name: 'uList',
+  components: { UserRow },
+  data() {
+  return {
         baseURL : "http://localhost:8080/",
         users: null,
       }
@@ -45,22 +45,22 @@ export default {
     mounted(){
       this.getUsers();
     }
-  }
+}
 </script>
 
 <style>
 
-    .user-list-title {
-        text-align: left;
-        margin-bottom: 2rem;
-    }
+  .user-list-title {
+    text-align: left;
+    margin-bottom: 2rem;
+  }
 
-    th, tbody td {
-        text-align: left;
-        padding: 12px 16px;      
-        color: #333333;         
-        background-color: #f8f9fa; 
-    }   
+  th, tbody td {
+    text-align: left;
+    padding: 12px 16px;      
+    color: #333333;         
+    background-color: #f8f9fa; 
+  }   
 
     
 </style>

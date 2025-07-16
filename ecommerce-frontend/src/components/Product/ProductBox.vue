@@ -12,14 +12,18 @@
           v-if="$route.name == 'AdminProduct'"
           :to="{ name: 'EditProduct', params: { id: product.id } }"
         >Edit</router-link>
+        <slot></slot>
 
-        <router-link
-          v-if="$route.name == 'WishList'"
+        <!-- <router-link
+          v-if="$route.name == 'WishListDelete'"
           class="remove-link"
           :to="{ name: 'EditProduct', params: { id: product.id } }"
         >
         Remove
-      </router-link>
+      </router-link> -->
+      <!-- <a href="#" class="text-right" @click="deleteItem(product.id)">
+        Remove
+      </a> -->
         </div>
     </div>
   </div>
@@ -28,8 +32,9 @@
 <script>
 export default {
     name : "ProductBox",
-    props : ["product"],
+    props : ["product","baseURL"],
     methods : {
+
     }
 }
 </script>

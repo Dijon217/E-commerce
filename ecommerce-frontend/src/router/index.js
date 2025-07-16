@@ -78,6 +78,11 @@ const routes = [
     component: WishList
   },
   {
+    path: '/wishlist/delete',
+    name: 'WishListDelete',
+    component: WishList
+  },
+  {
     path : '/cart',
     name : 'Cart',
     component : Cart

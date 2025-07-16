@@ -5,7 +5,6 @@
           <div class="rounded-circle bg-secondary me-3" style="width: 40px; height: 40px;"></div>
           <div>
             <div class="fw-bold">{{ user.fullName }}</div>
-            <!-- <div class="text-muted small">{{ user.company }}</div> -->
           </div>
         </div>
       </td>

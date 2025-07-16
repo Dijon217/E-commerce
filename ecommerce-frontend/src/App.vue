@@ -17,7 +17,6 @@
 </template>
 
 <script>
-
 const axios = require('axios');
 import Navbar from "./components/Navbar.vue"
 import Footer from "./components/Footer.vue"
@@ -30,16 +29,13 @@ export default {
       categories : null
     }
   },
-
   components : { Navbar, Footer},
   methods : {
     async fetchData() {
-      // fetch products
       await axios.get(this.baseURL + "product/")
               .then(res => this.products = res.data)
               .catch(err => console.log(err))
 
-      //fetch categories
       await axios.get(this.baseURL + "category/")
               .then(res => this.categories = res.data)
               .catch(err => console.log(err))
@@ -47,7 +43,6 @@ export default {
       await axios.get(this.baseURL + "user/admin")
               .then(res=> this.users = res.data)
               .catch(err => console.log(err))
-
     }
   },
   mounted() {
