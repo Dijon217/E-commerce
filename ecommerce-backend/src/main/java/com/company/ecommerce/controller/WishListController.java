@@ -9,6 +9,7 @@ import com.company.ecommerce.model.User;
 import com.company.ecommerce.model.WishList;
 import com.company.ecommerce.repository.ProductRepository;
 import com.company.ecommerce.repository.TokenRepository;
+import com.company.ecommerce.repository.WishListRepository;
 import com.company.ecommerce.service.AuthenticationService;
 import com.company.ecommerce.service.WishListService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ public class WishListController {
     AuthenticationService authenticationService;
 
     @Autowired
+    WishListRepository wishListRepository;
+
+    @Autowired
     private ProductRepository productRepository;
 
     @Autowired
@@ -39,15 +43,11 @@ public class WishListController {
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> addWishList(@RequestParam("productId") Integer productId,
                                                    @RequestParam("token") String token) throws AuthenticationFailException {
-        System.out.println("Token: " + token);
-        // Authenticate token
         authenticationService.authenticate(token);
 
-        // Fetch user and product
         User user = authenticationService.getUser(token);
         Product product = productRepository.getById(productId);
 
-        // Save wishlist
         WishList wishList = new WishList(user, product);
         wishListService.createWishlist(wishList);
 
@@ -57,24 +57,32 @@ public class WishListController {
 
     @GetMapping("/{token}")
     public ResponseEntity<List<ProductDto>> getWishList(@PathVariable("token") String token) throws AuthenticationFailException {
-        // first authenticate if the token is valid
         authenticationService.authenticate(token);
-        // then fetch the user linked to the token
         User user = authenticationService.getUser(token);
-        // first retrieve the wishlist items
         List<WishList> wishLists = wishListService.readWishList(user);
 
         List<ProductDto> products = new ArrayList<>();
         for (WishList wishList : wishLists) {
-            // change each product to product DTO
-            products.add(new ProductDto(wishList.getProduct()));
+            ProductDto productDto = new ProductDto(wishList.getProduct());
+            productDto.setWishlistID(wishList.getId());
+            products.add(productDto);
         }
-        // send the response to user
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @GetMapping("/")
     public AuthenticationToken getAllToken(){
         return tokenRepository.findTokenByToken("9b22ccd0-624e-4a27-8969-ec4154e2f092");
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<ApiResponse> deleteWishListItem(@RequestParam("wishListProductId") Integer wishListId,
+                                                   @RequestParam("token") String token) throws AuthenticationFailException {
+        authenticationService.authenticate(token);
+        if(wishListRepository.existsById(wishListId)){
+            wishListService.removeItemFromList(wishListId);
+            return new ResponseEntity<>(new ApiResponse(true, "WishList product removed succesfully"), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new ApiResponse(true, "WishList Product does not exist"), HttpStatus.BAD_REQUEST);
     }
 }

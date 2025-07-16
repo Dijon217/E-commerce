@@ -16,37 +16,29 @@ public class AuthenticationService {
     @Autowired
     private TokenRepository tokenRepository;
 
-    // save the confirmation token
     public void saveConfirmationToken(AuthenticationToken authenticationToken) {
         tokenRepository.save(authenticationToken);
     }
 
-    // get token of the User
     public AuthenticationToken getToken(User user) {
         return tokenRepository.findTokenByUser(user);
     }
 
-    // get User from the token
     public User getUser(String token) {
-        String theRealToken = token.trim();
-        AuthenticationToken authenticationToken = tokenRepository.findTokenByToken(theRealToken);
-        if (authenticationToken == null) {
-            System.out.println("Token not found: " + theRealToken);
+        if(token == null || token.trim().isEmpty()){
             return null;
         }
-        if (authenticationToken.getUser() == null) {
-            System.out.println("Token exists, but no user associated with token: " + theRealToken);
-            return null;
-        }
+        AuthenticationToken authenticationToken = tokenRepository.findTokenByToken(token.trim());
         return authenticationToken.getUser();
     }
 
-    // check if the token is valid
     public void authenticate(String token) throws AuthenticationFailException {
-        if (!Objects.nonNull(token)) {
+        if(token == null || token.trim().isEmpty()){
             throw new AuthenticationFailException(MessageStrings.AUTH_TOKEN_NOT_PRESENT);
         }
-        if (!Objects.nonNull(getUser(token))) {
+
+        User user = getUser(token);
+        if(user == null){
             throw new AuthenticationFailException(MessageStrings.AUTH_TOKEN_NOT_VALID);
         }
     }

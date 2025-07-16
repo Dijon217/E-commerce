@@ -31,7 +31,7 @@ public class OrderDto {
         this.orderId = order.getId();
         this.totalPrice = order.getTotalPrice();
         this.createdDate = order.getCreatedDate();
-        this.imageUrl = order.getOrderItems().get(0).getProduct().getImageURL();
+        this.imageUrl = order.getOrderItems().get(0).getPurchasedItemSnapshot().getImageURL();
         this.totalItems = order.getOrderItems().size();
     }
 

@@ -5,10 +5,7 @@ import com.company.ecommerce.dto.cart.CartItemDto;
 import java.util.List;
 
 public class CartDto {
-    //list of each item
     private List<CartItemDto> cartItems;
-
-    // total cost for the cart
     private double totalCost;
 
     public CartDto(List<CartItemDto> cartItemDtoList, double totalCost) {
@@ -16,7 +13,7 @@ public class CartDto {
         this.totalCost = totalCost;
     }
 
-    public List<CartItemDto> getcartItems() {
+    public List<CartItemDto> getCartItems() {
         return cartItems;
     }
 
@@ -28,7 +25,7 @@ public class CartDto {
         return totalCost;
     }
 
-    public void setTotalCost(int totalCost) {
+    public void setTotalCost(double totalCost) {
         this.totalCost = totalCost;
     }
 }

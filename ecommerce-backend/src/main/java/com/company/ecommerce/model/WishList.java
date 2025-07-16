@@ -1,5 +1,8 @@
 package com.company.ecommerce.model;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -19,7 +22,7 @@ public class WishList {
     private Date createdDate;
 
     @ManyToOne()
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     public WishList(){

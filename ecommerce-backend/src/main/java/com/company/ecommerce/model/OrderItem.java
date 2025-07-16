@@ -1,8 +1,11 @@
 package com.company.ecommerce.model;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.Optional;
 
 @Entity
 @Table(name = "orderItems")
@@ -25,18 +28,35 @@ public class OrderItem {
     private Order order;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private Product product;
+    @JoinColumn(name = "purchased_Item_id", referencedColumnName = "id")
+    private PurchasedItemSnapshot purchasedItemSnapshot;
+
 
     public OrderItem(){
     }
 
-    public OrderItem(Order order, @NotNull Product product, @NotNull int quantity, @NotNull double price){
-        this.product = product;
+    public OrderItem(Order order, @NotNull PurchasedItemSnapshot purchasedItemSnapshot, @NotNull int quantity, @NotNull double price){
+        this.purchasedItemSnapshot = purchasedItemSnapshot;
         this.quantity = quantity;
         this.price = price;
         this.order = order;
         this.createdDate = new Date();
+    }
+
+    public OrderItem(Date createdDate, double price, PurchasedItemSnapshot purchasedItemSnapshot, int quantity, Order order) {
+        this.quantity = quantity;
+        this.price = price;
+        this.createdDate = createdDate;
+        this.order = order;
+        this.purchasedItemSnapshot = purchasedItemSnapshot;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public int getQuantity() {
@@ -71,11 +91,11 @@ public class OrderItem {
         this.order = order;
     }
 
-    public Product getProduct() {
-        return product;
+    public PurchasedItemSnapshot getPurchasedItemSnapshot() {
+        return purchasedItemSnapshot;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
+    public void setPurchasedItemSnapshot(PurchasedItemSnapshot purchasedItemSnapshot) {
+        this.purchasedItemSnapshot = purchasedItemSnapshot;
     }
 }

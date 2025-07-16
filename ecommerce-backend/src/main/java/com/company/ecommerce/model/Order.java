@@ -34,6 +34,13 @@ public class Order {
     public Order (){
     }
 
+    public Order(User user,String sessionId, Date createdDate, Double totalPrice){
+        this.createdDate = createdDate;
+        this.totalPrice = totalPrice;
+        this.sessionId = sessionId;
+        this.user = user;
+    }
+
     public Integer getId() {
         return id;
     }

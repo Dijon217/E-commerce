@@ -1,6 +1,9 @@
 package com.company.ecommerce.model;
 
+import com.company.ecommerce.dto.product.ProductDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -19,8 +22,7 @@ public class Product {
     private @NotNull String imageURL;
     private @NotNull double price;
     private @NotNull String description;
-    @OneToMany(mappedBy = "product")
-    private List<WishList> wishlists;
+    private @NotNull Integer quantity;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -31,12 +33,22 @@ public class Product {
 
     }
 
-    public Product(String name, String imageURL, double price, String description, Category category) {
+    public Product(String name, String imageURL, double price, String description, Category category, Integer quantity) {
         super();
         this.name = name;
         this.imageURL = imageURL;
         this.price = price;
         this.description = description;
+        this.category = category;
+        this.quantity = quantity;
+    }
+
+    public Product(ProductDto productDto, Category category) {
+        this.name = productDto.getName();
+        this.imageURL = productDto.getImageUrl();
+        this.price = productDto.getPrice();
+        this.description = productDto.getDescription();
+        this.quantity = productDto.getQuantity();
         this.category = category;
     }
 
@@ -88,12 +100,12 @@ public class Product {
         this.category = category;
     }
 
-    public List<WishList> getWishlists() {
-        return wishlists;
+    public Integer getQuantity() {
+        return quantity;
     }
 
-    public void setWishlists(List<WishList> wishlists) {
-        this.wishlists = wishlists;
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
     @Override
@@ -104,7 +116,9 @@ public class Product {
                 ", imageURL='" + imageURL + '\'' +
                 ", price=" + price +
                 ", description='" + description + '\'' +
+                ", quantity=" + quantity +
                 ", category=" + category +
+                ", quantity=" + quantity +
                 '}';
     }
 }

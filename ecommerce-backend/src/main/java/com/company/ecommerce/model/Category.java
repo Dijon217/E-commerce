@@ -73,6 +73,10 @@ public class Category {
 
     @Override
     public String toString() {
-        return "User {category id=" + id + ", category name='" + categoryName + "', description='" + description + "'}";
+        return "User {category id=" + id +
+                ", category name='"
+                + categoryName
+                + "', description='"
+                + description + "'}";
     }
 }

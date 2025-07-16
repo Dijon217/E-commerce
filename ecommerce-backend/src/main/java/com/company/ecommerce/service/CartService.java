@@ -17,6 +17,7 @@ import java.util.Optional;
 
 @Service
 public class CartService {
+
     @Autowired
     CartRepository cartRepository;
 
@@ -26,44 +27,27 @@ public class CartService {
     }
 
     public CartDto listCartItems(User user) {
-        // first get all the cart items for user
         List<Cart> cartList = cartRepository.findAllByUserOrderByCreatedDateDesc(user);
-
-        // convert cart to cartItemDto
         List<CartItemDto> cartItems = new ArrayList<>();
+        double totalCost = 0;
+
         for (Cart cart:cartList){
             CartItemDto cartItemDto = new CartItemDto(cart);
             cartItems.add(cartItemDto);
-        }
-
-        // calculate the total price
-        double totalCost = 0;
-        for (CartItemDto cartItemDto :cartItems){
             totalCost += cartItemDto.getProduct().getPrice() * cartItemDto.getQuantity();
         }
 
-        // return cart DTO
         return new CartDto(cartItems,totalCost);
     }
 
     public void deleteCartItem(int cartItemId, User user) throws CartItemNotExistException {
-        // first check if cartItemId is valid else throw an CartItemNotExistException
-
-        Optional<Cart> optionalCart = cartRepository.findById(cartItemId);
-
-        if (!optionalCart.isPresent()) {
+        Cart cart = cartRepository.findById(cartItemId).orElse(null);
+        if(cart == null){
             throw new CartItemNotExistException("cartItemId not valid");
         }
-
-        // next check if the cartItem belongs to the user else throw CartItemNotExistException exception
-        Cart cart = optionalCart.get();
-
         if (!cart.getUser().equals(user)) {
             throw new CartItemNotExistException("cart item does not belong to user");
         }
-
         cartRepository.deleteById(cartItemId);
-        // delete the cart item
-
     }
 }

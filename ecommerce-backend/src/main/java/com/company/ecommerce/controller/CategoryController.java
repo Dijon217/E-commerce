@@ -3,6 +3,7 @@ package com.company.ecommerce.controller;
 import com.company.ecommerce.config.ApiResponse;
 import com.company.ecommerce.dto.category.CategoryDto;
 import com.company.ecommerce.model.Category;
+import com.company.ecommerce.repository.CategoryRepository;
 import com.company.ecommerce.service.CategoryService;
 import com.company.ecommerce.service.UploadToS3Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +30,14 @@ public class CategoryController {
     @Autowired
     private UploadToS3Service uploadFileToS3;
 
+
     @PostMapping(value = "/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse>
     createCategory(@RequestPart("categoryName") String categoryName,
                    @RequestPart("description") String description,
                    @RequestPart("image") MultipartFile imageFile) throws IOException {
 
-        String imageLink = uploadFileToS3.uploadFileToBucket(imageFile);
+        String imageLink = uploadFileToS3.uploadFileToBucket(imageFile, categoryName, "Category");
         Category category = new Category(categoryName, description, imageLink);
         if(Objects.nonNull(categoryService.readCategory(category.getCategoryName()))){
             return new ResponseEntity<ApiResponse>(new ApiResponse(false,"Category already exist"), HttpStatus.CONFLICT);
@@ -62,10 +64,14 @@ public class CategoryController {
     @PostMapping("/delete/{categoryID}")
     public  ResponseEntity<ApiResponse> deleteCategory(@PathVariable("categoryID") Integer categoryID){
         if(Objects.nonNull(categoryService.readCategory(categoryID))){
-            categoryService.deleteCategory(categoryID);
-            return new ResponseEntity<ApiResponse>(new ApiResponse(true,"Category Deleted"), HttpStatus.OK);
+            if(categoryService.deleteCategory(categoryID)){
+                return new ResponseEntity<ApiResponse>(new ApiResponse(true,"Category Deleted"), HttpStatus.OK);
+            }else{
+                return new ResponseEntity<ApiResponse>(new ApiResponse(false,"Please remove product before deleting category"), HttpStatus.BAD_REQUEST);
+            }
+        }else{
+            return new ResponseEntity<ApiResponse>(new ApiResponse(false,"Category cannot be null"), HttpStatus.NOT_EXTENDED);
         }
-        return new ResponseEntity<ApiResponse>(new ApiResponse(false,"Category does not exist"), HttpStatus.NOT_EXTENDED);
     }
 
 }

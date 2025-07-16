@@ -3,12 +3,13 @@ package com.company.ecommerce.service;
 import com.company.ecommerce.dto.CheckoutItemDto;
 import com.company.ecommerce.dto.cart.CartDto;
 import com.company.ecommerce.dto.cart.CartItemDto;
+import com.company.ecommerce.dto.product.ProductDto;
 import com.company.ecommerce.exception.OrderNotFoundException;
-import com.company.ecommerce.model.Order;
-import com.company.ecommerce.model.OrderItem;
-import com.company.ecommerce.model.User;
+import com.company.ecommerce.model.*;
+import com.company.ecommerce.repository.CartRepository;
 import com.company.ecommerce.repository.OrderItemsRepository;
 import com.company.ecommerce.repository.OrderRepository;
+import com.company.ecommerce.repository.PurchaseItemSnapshotRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
@@ -25,10 +26,19 @@ public class OrderService {
     private CartService cartService;
 
     @Autowired
-    OrderRepository orderRepository;
+    private ProductService productService;
 
     @Autowired
-    OrderItemsRepository orderItemsRepository;
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderItemsRepository orderItemsRepository;
+
+    @Autowired
+    private PurchaseItemSnapshotRepository purchasedItemSnapshotRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
 
     @Value("${BASE_URL}")
     private String baseURL;
@@ -36,7 +46,6 @@ public class OrderService {
     @Value("${STRIPE_SECRET_KEY}")
     private String apiKey;
 
-    // create total price and send productName as input
     SessionCreateParams.LineItem.PriceData createPriceData(CheckoutItemDto checkoutItemDto) {
         return SessionCreateParams.LineItem.PriceData.builder()
                 .setCurrency("usd")
@@ -48,33 +57,24 @@ public class OrderService {
                 .build();
     }
 
-    // build each product in the stripe checkout page
     SessionCreateParams.LineItem createSessionLineItem(CheckoutItemDto checkoutItemDto) {
         return SessionCreateParams.LineItem.builder()
-                // set price for each product
                 .setPriceData(createPriceData(checkoutItemDto))
-                // set quantity for each product
                 .setQuantity(Long.parseLong(String.valueOf(checkoutItemDto.getQuantity())))
                 .build();
     }
 
-    // create session from list of checkout items
     public Session createSession(List<CheckoutItemDto> checkoutItemDtoList) throws StripeException {
-
-        // supply success and failure url for stripe
         String successURL = baseURL + "payment/success";
         String failedURL = baseURL + "payment/failed";
 
-        // set the private key
         Stripe.apiKey = apiKey;
         List<SessionCreateParams.LineItem> sessionItemsList = new ArrayList<>();
 
-        // for each product compute SessionCreateParams.LineItem
         for (CheckoutItemDto checkoutItemDto : checkoutItemDtoList) {
             sessionItemsList.add(createSessionLineItem(checkoutItemDto));
         }
 
-        // build the session param
         SessionCreateParams params = SessionCreateParams.builder()
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.PAYMENT)
@@ -86,29 +86,29 @@ public class OrderService {
     }
 
     public void placeOrder(User user, String sessionId) {
-        // first let get cart items for the user
+        PurchasedItemSnapshot purchasedItemSnapshot = null;
         CartDto cartDto = cartService.listCartItems(user);
+        List<CartItemDto> cartItemDtoList = cartDto.getCartItems();
 
-        List<CartItemDto> cartItemDtoList = cartDto.getcartItems();
-
-        // create the order and save it
-        Order newOrder = new Order();
-        newOrder.setCreatedDate(new Date());
-        newOrder.setSessionId(sessionId);
-        newOrder.setUser(user);
-        newOrder.setTotalPrice(cartDto.getTotalCost());
+        Order newOrder = new Order(user,sessionId,new Date(),cartDto.getTotalCost());
         orderRepository.save(newOrder);
 
-        for (CartItemDto cartItemDto : cartItemDtoList) {
-            // create orderItem and save each one
-            OrderItem orderItem = new OrderItem();
-            orderItem.setCreatedDate(new Date());
-            orderItem.setPrice(cartItemDto.getProduct().getPrice());
-            orderItem.setProduct(cartItemDto.getProduct());
-            orderItem.setQuantity(cartItemDto.getQuantity());
-            orderItem.setOrder(newOrder);
-            // add to order item list
+        for(CartItemDto cartItemDto: cartItemDtoList){
+            purchasedItemSnapshot = new PurchasedItemSnapshot(cartItemDto.getProduct());
+            if(!purchasedItemSnapshotRepository.existsByName(purchasedItemSnapshot.getName())){
+                purchasedItemSnapshot = purchasedItemSnapshotRepository.save(purchasedItemSnapshot);
+            }else{
+                purchasedItemSnapshot = purchasedItemSnapshotRepository.findByName(purchasedItemSnapshot.getName());
+            }
+
+            OrderItem orderItem = new OrderItem(new Date(), cartItemDto.getProduct().getPrice(), purchasedItemSnapshot, cartItemDto.getQuantity(), newOrder);
             orderItemsRepository.save(orderItem);
+
+            ProductDto productDto = new ProductDto(cartItemDto.getProduct());
+            productDto.setQuantity(cartItemDto.getProduct().getQuantity() - cartItemDto.getQuantity());
+            productService.updateProduct(cartItemDto.getProduct().getId(), productDto,cartItemDto.getProduct().getCategory());
+
+            cartRepository.deleteById(cartItemDto.getId());
         }
     }
 
@@ -116,15 +116,12 @@ public class OrderService {
         return orderRepository.findAllByUserOrderByCreatedDateDesc(user);
     }
 
-    // find the order by id, validate if the order belong to user and return
-    public Order getOrder(Integer orderId, User user) throws OrderNotFoundException {
-        Optional<Order> optionalOrder = orderRepository.findById(orderId);
 
-        if (optionalOrder.isEmpty()) {
+    public Order getOrder(Integer orderId, User user) throws OrderNotFoundException {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if(order == null){
             throw  new OrderNotFoundException("order id is not valid");
         }
-
-        Order order = optionalOrder.get();
         if(order.getUser() != user) {
             throw  new OrderNotFoundException("order does not belong to user");
         }

@@ -2,6 +2,8 @@ package com.company.ecommerce.model;
 
 import com.company.ecommerce.model.Product;
 import com.company.ecommerce.model.User;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -78,6 +80,10 @@ public class Cart {
 
     public Integer getId() {
         return this.id;
+    }
+
+    public void setId(Integer id){
+        this.id = id;
     }
 
     @Override

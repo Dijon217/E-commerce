@@ -36,13 +36,14 @@ public class ProductController {
 
     @PostMapping(value = "/add",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse> addProduct(@RequestParam("categoryId") Integer categoryId,
-                                                  @RequestParam("name") String categoryName,
+                                                  @RequestParam("name") String productName,
                                                   @RequestParam("description") String categoryDescription,
                                                   @RequestPart("image") MultipartFile image,
-                                                  @RequestParam("price") double categoryPrice) throws IOException {
+                                                  @RequestParam("price") double categoryPrice,
+                                                  @RequestParam("quantity") Integer quantity) throws IOException {
 
-        String imageLink = uploadToS3.uploadFileToBucket(image);
-        ProductDto productDto = new ProductDto(categoryName,imageLink, categoryPrice, categoryDescription, categoryId);
+        String imageLink = uploadToS3.uploadFileToBucket(image, productName, "Product" );
+        ProductDto productDto = new ProductDto(productName,imageLink, categoryPrice, categoryDescription, categoryId, quantity);
         Optional<Category> optionalCategory = categoryService.readCategory(productDto.getCategoryId());
         if(!optionalCategory.isPresent()) {
             return new ResponseEntity<>(new ApiResponse(false, "Category is Invalid"), HttpStatus.CONFLICT);

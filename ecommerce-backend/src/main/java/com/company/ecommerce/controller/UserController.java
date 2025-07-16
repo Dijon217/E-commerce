@@ -29,7 +29,7 @@ public class UserController {
         return userService.signUp(signupDto);
     }
 
-    @PostMapping("/signIn") //Switch to get mapping
+    @PostMapping("/signIn")
     public SignInResponseDto SignIn(@RequestBody SignInDto signInDto) throws CustomException, AuthenticationFailException{
         return userService.signIn(signInDto);
     }

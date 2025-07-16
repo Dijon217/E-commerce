@@ -12,12 +12,12 @@ public class S3KeyGenerator {
     private String originalFileName;
     private LocalDateTime timestamp;
 
-    public String generateKey() {
+    public String generateKey(String name, String type) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
         String formattedDate = timestamp != null
                 ? timestamp.format(formatter)
                 : LocalDateTime.now().format(formatter);
 
-        return formattedDate + "_" + originalFileName;
+        return type +"_" + name  +"_" + formattedDate + "_" + originalFileName;
     }
 }
